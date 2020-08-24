@@ -23,8 +23,10 @@
                     <p>
                         You are not logged. Have an account? click on login otherwise click on register for such.
                     </p>
-                    <a href="{% url "blog:login" %}?redirect={{request.path|urlencode}}" class="btn bg-primary text-white">Login</a>
-                    <a href="{% url "blog:register" %}?redirect={{request.path|urlencode}}" class="btn bg-secondary text-white">Register</a>
+                    <div class="ml-auto mb-5">
+                        <a href="{% url "blog:login" %}?redirect={{request.path|urlencode}}" class="btn btn-primary">Login</a>
+                        <a href="{% url "blog:register" %}?redirect={{request.path|urlencode}}" class="btn btn-secondary">Register</a>
+                    </div>
                 {% endif %}
                 <label for={{comment_form.content.auto_id}}>{{comment_form.content.label}}</label>
                 {{comment_form.content}}
