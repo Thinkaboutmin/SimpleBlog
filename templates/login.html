@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title%}Login{% endblock %}
+
+{% block content %}
+<main class="container">
+    <div class="pt-5 mt-5">
+        <div class="p-5 shadow border border-dark">
+            <form method="POST">
+                {% csrf_token %}
+                {% for field_error in form.errors.values %}
+                    <div class="text-danger">{{field_error}}</div>
+                {% endfor %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.auto_id }}"> {{field.label}}</label>
+                    {{field}}
+                </div>
+                {% endfor %}
+                <input type="text" name="redirect" value="{{url_redirect}}" id="redirect" hidden="">
+                <button type="submit" class="btn btn-primary"> Login </button>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}

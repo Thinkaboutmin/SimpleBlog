@@ -1,0 +1,9 @@
+html,
+body {
+    height: 100%;
+}
+
+#navbar-quirks {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %} Which User {% endblock %}
+
+{% block content %}
+<main class="container">
+    {% if user.is_authenticated %}
+        {{user.username}}
+        <br>
+
+        <form method="POST" action="/blog/logout">
+            {% csrf_token %}
+            <button type="submit">LogOut</button>
+        </form>
+    {% else %}
+        <p>Leave, Jon Doe</p>
+    {% endif %}
+</main>
+{% endblock %}
