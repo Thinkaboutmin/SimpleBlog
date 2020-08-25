@@ -8,7 +8,7 @@ It's capable of publishing articles and comment on them. That's all
 
 ## How it looks? 
 
-No photos for now... Well, not really fancy I will tell.
+No photos for now... Well, not really fancy I would say.
 
 ## TODO
 
