@@ -3,9 +3,9 @@
 {% block title%}Login{% endblock %}
 
 {% block content %}
-<main class="container">
-    <div class="pt-5 mt-5">
-        <div class="p-5 shadow border border-dark">
+<main class="d-flex flex-column container align">
+    <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="p-5 shadow border border-dark w-100">
             <form method="POST">
                 {% csrf_token %}
                 {% for field_error in form.errors.values %}

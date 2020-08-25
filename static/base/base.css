@@ -1,9 +1,22 @@
-html,
-body {
-    height: 100%;
-}
-
 #navbar-quirks {
     padding-top: 15px;
     padding-bottom: 15px;
+}
+
+html, body {
+    height: 100%
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    height: 100px;
+    min-height: 100px;
+}
+
+main {
+    flex: 1 0 auto;
 }

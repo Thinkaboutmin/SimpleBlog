@@ -3,9 +3,9 @@
 {% block title%}Register{% endblock %}
 
 {% block content %}
-<main class="container">
-    <div class="mt-5 pt-5">
-        <div class="p-5 shadow border border-dark">
+<main class="d-flex flex-column container">
+    <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="p-5 shadow border border-dark w-100">
             {% for error in form.errors.values %}
                 <div class="text-danger">{{error}}</div>
             {% endfor %}
