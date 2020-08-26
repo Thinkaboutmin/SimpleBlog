@@ -1,8 +1,7 @@
 from django.contrib import admin
 from datetime import datetime
 from .models import Post
-
-# Register your models here.
+from django.contrib.admin import AdminSite
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
