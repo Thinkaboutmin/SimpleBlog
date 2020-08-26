@@ -2,20 +2,79 @@ from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as log, logout as logo
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
-from django.http.response import HttpResponseBadRequest
+from django.http.response import HttpResponseBadRequest, Http404
 from .forms import SigninForm, LoginForm, CommentForm
 from .models import Post
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage
 
 @require_GET
 def index(request):
-    posts = Post.objects.order_by("-pub_date")
+    """
+    Show the main page with all the posts.
 
-    return render(request, "base.html", {"posts": posts})
+    The index uses pagination, 5 posts per page.
+
+    @param request The request from the client.
+
+    Return the base.html page if the page exists otherwise returns 400 error page.
+    """
+    tmp_posts = Post.objects.order_by("-pub_date")
+    posts_page = Paginator(tmp_posts, 5)
+    # Default to page one when none is given
+    page = request.GET.get("page", 1)
+    try:
+        posts = posts_page.page(page)
+    except EmptyPage:
+        return render(
+            request,
+            "error.html",
+            {
+                "message": f"Could not find page: {page}",
+                "title_text": "Page not found - Post"
+            },
+            status=400
+        )
+    
+    return render(
+        request,
+        "base.html", 
+        {
+        "posts": posts,
+        }
+    )
 
 @require_GET
 def search(request):
-    posts = Post.objects.filter(header__contains=request.GET["header"])
+    """
+    Search for posts according to what was given.
+    The search will be based if the header contains some or all
+    the text of what was given.
+
+    The search uses pagination, 5 Posts per page. If the given
+    page parameter returns an EmptyPage exception an error page will
+    be given.
+
+    @param request The request from the client.
+
+    Return the base.html page if the page exists otherwise returns 400 error page.
+    """
+    tmp_posts = Post.objects.order_by("-pub_date").filter(header__contains=request.GET["header"])
+    posts_page = Paginator(tmp_posts, 5)
+    # Default to page one when none is given
+    page = request.GET.get("page", 1)
+    try:
+        posts = posts_page.page(page)
+    except EmptyPage:
+        return render(
+            request,
+            "error.html",
+            {
+                "message": f"Could not find page: {page}",
+                "title_text": "Page not found - Post"
+            },
+            status=400
+        )
 
     return render(request, "base.html", {"posts": posts})
 
@@ -60,6 +119,16 @@ def show_post(request, str):
 
 @require_http_methods(["GET", "POST"])
 def sign_in(request):
+    """
+    Sign in users to the blog. If the request is a
+    GET it will return the registration form. If it's
+    a POST, it will register the user to the database
+    according to what was given in the request.
+
+    @param request The request from the client.
+
+    Returns a page form if it's a GET otherwise redirects if it's a POST.
+    """
     if (request.method == "POST"):
         form = SigninForm(request.POST)
         if (form.is_valid()):
@@ -70,22 +139,37 @@ def sign_in(request):
             })
 
             if (loginForm.is_valid()):
+                # Well, the user registered
+                # so, let's login it already as well.
                 log(request, loginForm.user_cache)
 
+            # Redirect the user to it's last page.
             redirect_url = request.POST.get("redirect", "index")
             return redirect(redirect_url)
         
     else:
         form = SigninForm()
 
+    # Put the redirect value to index, just to be sure.
     url_redirect = request.GET.get("redirect", "index")
     return render(request, "register.html", {"form": form, "url_redirect": url_redirect})
 
 @require_http_methods(["GET", "POST"])
 def login(request):
+    """
+    Returns a login form for the user if the request is a GET. If
+    it's a POST, it log in the user and redirect to the last page.
+
+    @param request The request from the client.
+
+    Return a login form if it's a GET otherwise redirects to the last page if it's POST
+    """
     if (request.method == "POST"):
         form = LoginForm(data=request.POST)
         if (form.is_valid()):
+            # Whenever the LoginForm.is_valid is ran it will
+            # generate a variable with an User object called user_cache. We
+            # just pick it and log it as it haves the same data to what was given.
             log(request, form.user_cache)
 
             url_redirect = request.POST.get("redirect", "index")
@@ -93,23 +177,7 @@ def login(request):
             return redirect(url_redirect)
     
     form = LoginForm()
+    # Put the redirect value to index, just to be sure.
     url_redirect = request.GET.get("redirect", "index")
 
     return render(request, "login.html", {"form": form, "url_redirect": url_redirect})
-    
-@require_http_methods(["GET", "POST"])
-def make_post(request):
-
-    return None
-
-@require_GET
-def which_user(request):
-    return render(request, "which_user.html", {"user": request.user})
-
-def logout(request):
-    if (request.user.is_authenticated):
-        logo(request)
-
-        return redirect("login")
-    
-    return HttpResponseBadRequest("Can't logout if no user is logged or authenticated.")
