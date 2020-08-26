@@ -76,7 +76,11 @@ def search(request):
             status=400
         )
 
-    return render(request, "base.html", {"posts": posts})
+    # Easy the logic on the template file by giving a header
+    # parameter. This should be used on the pagination, concatennating
+    # a url (the same as this view was called is preferable...)
+    header = f";header={request.GET['header']}"
+    return render(request, "base.html", {"posts": posts, "header": header})
 
 @require_http_methods(["GET", "POST"])
 def show_post(request, str):
