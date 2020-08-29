@@ -20,7 +20,8 @@
 </main>
 <div class="container">
     <div class="mb-5">
-        <form method="POST" class="mb-3">
+        <form method="POST" class="mb-3" id="commentForm">
+            <input type="text" hidden="" id="{{comment_form.reply.auto_id}}">
             {% csrf_token %}
             <div class="form-group">
                 {% if comment_form.author.errors %}
@@ -31,6 +32,11 @@
                         <a href="{% url "blog:login" %}?redirect={{request.path|urlencode}}" class="btn btn-primary">Login</a>
                         <a href="{% url "blog:register" %}?redirect={{request.path|urlencode}}" class="btn btn-secondary">Register</a>
                     </div>
+                {% endif %}
+                {% if comment_form.reply.errors %}
+                <p>
+                    It was not possible to reply to a comment.
+                </p>
                 {% endif %}
                 <label for={{comment_form.content.auto_id}}>{{comment_form.content.label}}</label>
                 {{comment_form.content}}
@@ -45,6 +51,7 @@
                 <h5 class="card-title">{{comment.author}}</h5>
                 <p class="card-text">{{comment.content}}</p>
                 <p class="card-text">Commented at {{comment.comment_date|date:"d/m/Y H:i"}}</p>
+                <a class="card-link" onClick="transcriptReply('{{ comment.author }}', '{{ comment.content|truncatechars:50|escapejs }}', {{comment.id}})">Reply</a>
             </div>
         </div>
     {% empty %}
@@ -53,4 +60,34 @@
         </div>
     {% endfor %}
 </div>
+{% endblock %}
+{% block footer %}
+{% spaceless %}
+<script>
+    function transcriptReply(author, content, id) {
+        // Check if there's already a repply.
+        if (document.getElementById("replyContent")) {
+            removeRepply()
+        }
+
+        campValue = document.getElementById("{{ comment_form.reply.auto_id }}").setAttribute("value", id)
+
+        commentContent = document.createElement("template")
+        commentContent.innerHTML = '<div id="replyContent"><h4>Replying to ' + author + '</h4> <p>Comment:' + content.toString() + 
+                                   '</p><a class="btn btn-secondary mb-3" onClick="removeRepply()">Cancel Reply</a></div>'
+        commentContent = commentContent.content.firstChild
+        commentForm = document.getElementById("commentForm")
+        commentForm.insertBefore(commentContent, commentForm.childNodes[0])
+        // Avoid having a hash on the url, it annoying when there's a need to
+        // refresh the page.
+        commentForm.scrollIntoView()
+    }
+
+    function removeRepply () {
+        commentContent = document.getElementById("replyContent")
+        commentContent.remove()
+        document.getElementById("{{ comment_form.reply.auto_id }}").removeAttribute("value")
+    }
+</script>
+{% endspaceless %}
 {% endblock %}
