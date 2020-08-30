@@ -21,7 +21,7 @@
 <div class="container">
     <div class="mb-5">
         <form method="POST" class="mb-3" id="commentForm">
-            <input type="text" hidden="" id="{{comment_form.reply.auto_id}}">
+            <input type="number" hidden="" id="{{comment_form.reply.auto_id}}">
             {% csrf_token %}
             <div class="form-group">
                 {% if comment_form.author.errors %}
@@ -38,20 +38,23 @@
                     It was not possible to reply to a comment.
                 </p>
                 {% endif %}
-                <label for={{comment_form.content.auto_id}}>{{comment_form.content.label}}</label>
+                <label for="{{ comment_form.content.auto_id }}" id="{{ comment_form.content.auto_id }}_label">{{comment_form.content.label}}</label>
                 {{comment_form.content}}
             </div>
-            <button type="submit" class="btn btn-primary">Send comment</button>
+            <div class="d-inline-flex" id="commentButtons">
+                <button type="submit" class="btn btn-primary">Send comment</button>
+            </div>
         </form>
     </div>
     <h4>Comments:</h4>
     {% for comment in comments %}
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">{{comment.author}}</h5>
+                <h5 class="card-title">{{comment.author}}{% if comment.reply %} - {{ comment.reply.author }}{% endif %}</h5>
+                <p class="card-text">
                 <p class="card-text">{{comment.content}}</p>
                 <p class="card-text">Commented at {{comment.comment_date|date:"d/m/Y H:i"}}</p>
-                <a class="card-link" onClick="transcriptReply('{{ comment.author }}', '{{ comment.content|truncatechars:50|escapejs }}', {{comment.id}})">Reply</a>
+                <a class="card-link" onClick="transcriptReply('{{ comment.author }}', '{{ comment.content|truncatechars:80|escapejs }}', {{comment.id}})">Reply</a>
             </div>
         </div>
     {% empty %}
@@ -64,6 +67,9 @@
 {% block footer %}
 {% spaceless %}
 <script>
+    const replyMessage = "Send Reply"
+    const nonReplyMessage = "Send Comment"
+
     function transcriptReply(author, content, id) {
         // Check if there's already a repply.
         if (document.getElementById("replyContent")) {
@@ -71,21 +77,49 @@
         }
 
         campValue = document.getElementById("{{ comment_form.reply.auto_id }}").setAttribute("value", id)
+        campMessageLabel = document.getElementById("{{ comment_form.content.auto_id }}_label")
+        campMessageLabel.hidden = true
 
         commentContent = document.createElement("template")
         commentContent.innerHTML = '<div id="replyContent"><h4>Replying to ' + author + '</h4> <p>Comment:' + content.toString() + 
-                                   '</p><a class="btn btn-secondary mb-3" onClick="removeRepply()">Cancel Reply</a></div>'
+                                   '</p></div>'
         commentContent = commentContent.content.firstChild
+
         commentForm = document.getElementById("commentForm")
         commentForm.insertBefore(commentContent, commentForm.childNodes[0])
+
         // Avoid having a hash on the url, it annoying when there's a need to
         // refresh the page.
         commentForm.scrollIntoView()
+
+        commentButton = document.createElement("template")
+        commentButton.innerHTML = '<button type="button" class="btn btn-secondary ml-3" onClick="removeRepply()" id="cancelRepplyButton">Cancel Reply</button>'
+        commentButton = commentButton.content.firstElementChild
+
+        // Buttons menu for comments
+        commentButtons = document.getElementById("commentButtons")
+        commentButtons.firstElementChild.innerHTML = replyMessage
+        commentButtons.appendChild(commentButton)
     }
 
     function removeRepply () {
+        // Remove comment reply header and comment message
         commentContent = document.getElementById("replyContent")
         commentContent.remove()
+
+        // Remove cancel reply button        
+        commentButton = document.getElementById("cancelRepplyButton")
+        commentButton.remove()
+
+        // Change send button text
+        sendButton = document.getElementById("commentButtons").firstElementChild
+        sendButton.innerHTML = nonReplyMessage
+        
+        // Unhide the label message
+        campMessageLabel = document.getElementById("{{ comment_form.content.auto_id }}_label")
+        campMessageLabel.hidden = false
+
+        // Remove the attribute value from the form
         document.getElementById("{{ comment_form.reply.auto_id }}").removeAttribute("value")
     }
 </script>
