@@ -15,6 +15,5 @@ No photos for now... Well, not really fancy I would say.
 * Configure the admin menu properly
 * Add tests for any case (too late, but still worth)
 * A better url path
-* Add comment reply (It will be dead simple and not complex(no fancy trees and such), ok?)
 * Article with images
 * Easy way to implement articles with word size and color text, images and other things.
