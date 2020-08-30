@@ -21,7 +21,8 @@
 <div class="container">
     <div class="mb-5">
         <form method="POST" class="mb-3" id="commentForm">
-            <input type="number" hidden="" id="{{comment_form.reply.auto_id}}">
+            {# Not sure if name should be given hard-coded... #}
+            <input type="number" hidden="" id="{{comment_form.reply.auto_id}}" name="reply">
             {% csrf_token %}
             <div class="form-group">
                 {% if comment_form.author.errors %}
@@ -50,8 +51,12 @@
     {% for comment in comments %}
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">{{comment.author}}{% if comment.reply %} - {{ comment.reply.author }}{% endif %}</h5>
-                <p class="card-text">
+                <h5 class="card-title">{{comment.author}}{% if comment.reply %} - Replied to {{ comment.reply.author }}{% endif %}</h5>
+                {% if comment.reply %}
+                <div class="bg-light border mb-3">
+                    <p class="card-text">{{comment.reply.content}}</p>
+                </div>
+                {% endif %}
                 <p class="card-text">{{comment.content}}</p>
                 <p class="card-text">Commented at {{comment.comment_date|date:"d/m/Y H:i"}}</p>
                 <a class="card-link" onClick="transcriptReply('{{ comment.author }}', '{{ comment.content|truncatechars:80|escapejs }}', {{comment.id}})">Reply</a>

@@ -107,6 +107,7 @@ def show_post(request, str):
             "comment_date": datetime.now(),
             "author": request.user,
             "content": request.POST["content"],
+            "reply": request.POST["reply"],
         })
 
         if (comment_form.is_valid()):
